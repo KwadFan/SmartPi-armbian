@@ -26,7 +26,7 @@ runs:
       shell: bash
       run: |
         source ./build-configs/configs/config-default.conf
-        source ./build-configs/configs/smartpi1-${{ inputs.configfile }}.conf
+        source ./build-configs/configs/${{ inputs.configfile }}.conf
 
         echo "armbian_repository=${ARMBIAN_REPOSITORY}" >> $GITHUB_OUTPUT
         echo "armbian_branch=${ARMBIAN_BRANCH}" >> $GITHUB_OUTPUT
@@ -44,7 +44,7 @@ runs:
       run: |
         mkdir -p ./build/userpatches
         cp ./build-configs/configs/config-default.conf ./build/userpatches/config-settings.conf
-        cat ./build-configs/configs/smartpi1-${{ inputs.configfile }}.conf >> ./build/userpatches/config-settings.conf
+        cat ./build-configs/configs/${{ inputs.configfile }}.conf >> ./build/userpatches/config-settings.conf
         echo "::group::Output config-settings.conf"
         cat ./build/userpatches/config-settings.conf
         echo "::endgroup::"
@@ -52,7 +52,22 @@ runs:
     - name: Add custom board configuration
       shell: bash
       run: |
-        cp ./build-configs/boards/smartpi1.wip ./build/config/boards/smartpi1.wip
+        if [[ -d ./build-configs/boards ]]; then
+          cp -R -v ./build-configs/boards/* ./build/config/boards
+        else
+          echo -e "\e[0;33mNo custom board configuration found ... [SKIPPED]\e[0m"
+          exit 0
+        fi
+
+    - name: Add custom userpatches
+      shell: bash
+      run: |
+        if [[ -d ./build-configs/userpatches ]]; then
+          cp -R -v ./build-configs/userpatches/* ./build/userpatches
+        else
+          echo -e "\e[0;33mNo custom userpatches found ... [SKIPPED]\e[0m"
+          exit 0
+        fi
 
     - name: sed VERSION
       shell: bash

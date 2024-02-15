@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ci-buildtrain-${{ github.ref }}-1
+  group: ci-release-${{ github.ref }}-1
   cancel-in-progress: true
 
 jobs:
@@ -32,6 +32,7 @@ jobs:
     outputs:
       id: ${{ steps.release.outputs.id }}
       release_tag: ${{ steps.release_tag.outputs.release_tag }}
+      tag_name: ${{ steps.time.outputs.time }}
     steps:
       - name: Get Time
         id: time
@@ -98,7 +99,7 @@ jobs:
       - name: Create Matrix
         id: set-matrix
         run: |
-          JSON=$(find ${{ github.workspace }}/configs -type f -name "smartpi1-*.conf" -printf '%f\n' | sed 's#smartpi1-##;s#.conf##' | jq -R -s -c 'split("\n")[:-1]')
+          JSON=$(find ${{ github.workspace }}/configs -type f -name "*.conf" -printf '%f\n' | sed '/config*/d;s#.conf##' | jq -R -s -c 'split("\n")[:-1]')
           echo "configfiles=${JSON}" >> $GITHUB_OUTPUT
           echo "::group::Build Matrix"
           echo "${JSON}"
@@ -129,7 +130,8 @@ jobs:
         id: image_name
         shell: bash
         run: |
-          img_name="${{ github.event.repository.name }}"
+          source ./build-configs/configs/config-default.conf
+          img_name="${VENDOR}"
           img_name="${img_name}-${{ matrix.configfile }}"
           echo "image_name=${img_name}" >> $GITHUB_OUTPUT
           echo "::group::Image name"
@@ -150,7 +152,6 @@ jobs:
       - name: Calculating checksums
         run: |
           cd ${{ github.workspace }}/build/output/images/
-          sha256sum ${{ steps.image_name.outputs.image_name }}.img > ${{ steps.image_name.outputs.image_name }}.img.sha256
           sha256sum ${{ steps.image_name.outputs.image_name }}.img.xz > ${{ steps.image_name.outputs.image_name }}.img.xz.sha256
 
       - name: Upload Image to Release

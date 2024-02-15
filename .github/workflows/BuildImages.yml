@@ -8,6 +8,7 @@ on:
       - "configs/**"
       - ".github/workflows/**"
       - "actions/**"
+      - "userpatches/**"
 
   pull_request:
     types: [opened, edited, reopened, synchronize]
@@ -16,6 +17,7 @@ on:
       - "configs/**"
       - ".github/workflows/**"
       - "actions/**"
+      - "userpatches/**"
 
   workflow_dispatch:
 
@@ -37,7 +39,7 @@ jobs:
       - name: Create Matrix
         id: set-matrix
         run: |
-          JSON=$(find ${{ github.workspace }}/configs -type f -name "smartpi1-*.conf" -printf '%f\n' | sed 's#smartpi1-##;s#.conf##' | jq -R -s -c 'split("\n")[:-1]')
+          JSON=$(find ${{ github.workspace }}/configs -type f -name "*.conf" -printf '%f\n' | sed '/config*/d;s#.conf##' | jq -R -s -c 'split("\n")[:-1]')
           echo "configfiles=${JSON}" >> $GITHUB_OUTPUT
           echo "::group::Build Matrix"
           echo "${JSON}"
@@ -74,7 +76,8 @@ jobs:
         id: image_name
         shell: bash
         run: |
-          img_name="${{ github.event.repository.name }}"
+          source ./build-configs/configs/config-default.conf
+          img_name="${VENDOR}"
           img_name="${img_name}-${{ matrix.configfile }}"
           img_name="${img_name}-${{ needs.setup.outputs.time }}"
           echo "image_name=${img_name}" >> $GITHUB_OUTPUT
