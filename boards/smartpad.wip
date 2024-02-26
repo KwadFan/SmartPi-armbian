@@ -7,3 +7,10 @@ MODULES_CURRENT="g_serial"
 SERIALCON="ttyS0"
 KERNEL_TARGET="legacy,current,edge"
 PACKAGE_LIST_BOARD="firefox-esr onboard"
+
+function post_config_uboot_target__extra_configs_for_smartpad() {
+	display_alert "$BOARD" "set dram clock" "info"
+	run_host_command_logged scripts/config --set-val CONFIG_DRAM_CLK "624"
+	run_host_command_logged scripts/config --set-val CONFIG_DRAM_ZQ "3881979"
+	run_host_command_logged scripts/config --enable CONFIG_DRAM_ODT_EN
+}

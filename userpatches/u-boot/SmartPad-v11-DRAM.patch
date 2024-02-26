@@ -1,7 +1,0 @@
---- ./configs/nanopi_m1_defconfig	2024-02-23 19:18:53.124772119 +0100
-+++ ./nanopi_m1_defconfig	2024-02-23 23:10:09.553850687 +0100
-@@ -7,3 +7,4 @@
- # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
- CONFIG_USB_EHCI_HCD=y
- CONFIG_USB_OHCI_HCD=y
-+CONFIG_SUNXI_DRAM_DDR3_1333=n
